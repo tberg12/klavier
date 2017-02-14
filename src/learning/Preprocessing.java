@@ -11,8 +11,8 @@ import java.util.List;
 import tberg.murphy.threading.BetterThreader;
 import tberg.murphy.tuple.Pair;
 import main.Main;
+import nmf.NMFUtilOpenCL;
 import main.Main.NMFType;
-import nmf.NMFUtil;
 import tberg.murphy.arrays.a;
 import dsp.STFT;
 import eval.PitchEventUtil;
@@ -212,22 +212,22 @@ public class Preprocessing {
 
 						Pair<float[][],float[][]> atomAndEnvelope = null;
 						if (Main.nmfType == NMFType.KL) {
-							atomAndEnvelope = NMFUtil.nmfKL(subSpect, 1, 20, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps);
+							atomAndEnvelope = NMFUtilOpenCL.nmfKL(subSpect, 1, 20, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps);
 						} else if (Main.nmfType == NMFType.Beta) {
-							atomAndEnvelope = NMFUtil.nmfBeta(subSpect, 1, 20, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta);
+							atomAndEnvelope = NMFUtilOpenCL.nmfBeta(subSpect, 1, 20, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta);
 						} else if (Main.nmfType == NMFType.LogNormal) {
 							int iters = 2000;
 							float startStepSize = 1e-8f;
 							float endStepSize = 1e-8f;
 							float init = 1e-5f;
-							atomAndEnvelope = NMFUtil.nmfLogNormalExpGrad(a.scale(a.onesFloat(1, subSpect[0].length), init), true, a.scale(a.onesFloat(subSpect.length, 1), init), true, subSpect, startStepSize, endStepSize, iters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC);
+							atomAndEnvelope = NMFUtilOpenCL.nmfLogNormalExpGrad(a.scale(a.onesFloat(1, subSpect[0].length), init), true, a.scale(a.onesFloat(subSpect.length, 1), init), true, subSpect, startStepSize, endStepSize, iters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC);
 							while (a.hasinf(atomAndEnvelope.getFirst()) || a.hasnan(atomAndEnvelope.getFirst()) || a.hasinf(atomAndEnvelope.getSecond()) || a.hasnan(atomAndEnvelope.getSecond())) {
 								startStepSize *= 0.8;
 								endStepSize *= 0.8;
-								atomAndEnvelope = NMFUtil.nmfLogNormalExpGrad(a.scale(a.onesFloat(1, subSpect[0].length), init), true, a.scale(a.onesFloat(subSpect.length, 1), init), true, subSpect, startStepSize, endStepSize, iters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC);
+								atomAndEnvelope = NMFUtilOpenCL.nmfLogNormalExpGrad(a.scale(a.onesFloat(1, subSpect[0].length), init), true, a.scale(a.onesFloat(subSpect.length, 1), init), true, subSpect, startStepSize, endStepSize, iters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC);
 							}
 						} else {
-							atomAndEnvelope = NMFUtil.nmfL2(subSpect, 1, 20, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps);
+							atomAndEnvelope = NMFUtilOpenCL.nmfL2(subSpect, 1, 20, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps);
 						}
 						float[] atom = atomAndEnvelope.getFirst()[0];
 						float[] envelope = a.transpose(atomAndEnvelope.getSecond())[0];
@@ -265,16 +265,16 @@ public class Preprocessing {
 		float secondsPerFrame = spectAndSecondsPerFrame.getSecond();
 		float[][] activations = null;
 		if (Main.nmfType == NMFType.KL) {
-			activations = (Main.useGpu ? NMFUtil.nmfKLGPU(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond() : NMFUtil.nmfKL(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond());
+			activations = (Main.useGpu ? NMFUtilOpenCL.nmfKLGPU(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond() : NMFUtilOpenCL.nmfKL(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond());
 		} else if (Main.nmfType == NMFType.Beta) {
-			activations = (Main.useGpu ? NMFUtil.nmfBetaGPU(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta).getSecond() : NMFUtil.nmfBeta(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta).getSecond());
+			activations = (Main.useGpu ? NMFUtilOpenCL.nmfBetaGPU(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta).getSecond() : NMFUtilOpenCL.nmfBeta(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta).getSecond());
 		} else if (Main.nmfType == NMFType.LogNormal) {
 			float startStepSize = 1e-7f;
 			float endStepSize = 1e-7f;
 			float init = 1e-5f;
-			activations = (Main.useGpu ? NMFUtil.nmfLogNormalExpGradGPU(spectralAtoms, false, a.scale(a.onesFloat(spect.length, spectralAtoms.length), init), true, spect, startStepSize, endStepSize, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC).getSecond() : NMFUtil.nmfLogNormalExpGrad(spectralAtoms, false, a.scale(a.onesFloat(spect.length, spectralAtoms.length), init), true, spect, startStepSize, endStepSize, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC).getSecond());
+			activations = (Main.useGpu ? NMFUtilOpenCL.nmfLogNormalExpGradGPU(spectralAtoms, false, a.scale(a.onesFloat(spect.length, spectralAtoms.length), init), true, spect, startStepSize, endStepSize, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC).getSecond() : NMFUtilOpenCL.nmfLogNormalExpGrad(spectralAtoms, false, a.scale(a.onesFloat(spect.length, spectralAtoms.length), init), true, spect, startStepSize, endStepSize, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfC).getSecond());
 		}  else {
-			activations = (Main.useGpu ? NMFUtil.nmfL2GPU(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond() : NMFUtil.nmfL2(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond());
+			activations = (Main.useGpu ? NMFUtilOpenCL.nmfL2GPU(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond() : NMFUtilOpenCL.nmfL2(spectralAtoms, false, a.onesFloat(spect.length, spectralAtoms.length), true, spect, Main.nmfNumIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps).getSecond());
 		}
 		
 		if (ACTIVATIONS_POW) {

@@ -1,6 +1,7 @@
 package main;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import eval.PitchEventUtil;
 import tberg.murphy.fig.Option;
 import tberg.murphy.fig.OptionsParser;
 import tberg.murphy.fileio.f;
-import tberg.murphy.gpu.CublasUtil;
+import tberg.murphy.gpu.JOCLBlasUtil;
 import io.PitchEventIO.Event;
 
 public class Main implements Runnable {
@@ -54,9 +55,9 @@ public class Main implements Runnable {
 	@Option(gloss = "")
 	public static float datasetPrefixLengthSec = 30;
 	@Option(gloss = "")
-	public static String outputDir = "./piano_demo/output_test/";
+	public static String outputDir = "/Users/tberg/Desktop/piano_test/";
 	@Option(gloss = "")
-	public static String initSpectEnvSer = "./piano_demo/initSpectEnvFull.ser";
+	public static String initSpectEnvSer = "/Users/tberg/Dropbox/demos/klavier/piano_demo/initSpectEnvFull.ser";
 	@Option(gloss = "")
 //	public static String spectEnvSer = "./piano_demo/learnedSpecCNMAT2.ser";
 //	public static String spectEnvSer = "./piano_demo/learnedSpecCNMAT.ser";
@@ -64,9 +65,10 @@ public class Main implements Runnable {
 //	public static String spectEnvSer = "./piano_demo/learnedSpecEnvFullDemo1.ser";
 //	public static String spectEnvSer = "./piano_demo/learnedSpecEnvMiddleCPiano12.ser";
 //	public static String spectEnvSer = "./piano_demo/learnedSpecEnvFullMaps.ser";
-	public static String spectEnvSer = "/Users/tberg/Dropbox/demos/klavier/piano_demo/learnedSpecEnvGould2Itunes.ser";
+//	public static String spectEnvSer = "/Users/tberg/Dropbox/demos/klavier/piano_demo/learnedSpecEnvGould2Itunes.ser";
+	public static String spectEnvSer = "/Users/tberg/Desktop/piano_test/learnedSpecEnvGould2Itunes.ser";
     @Option(gloss = "")
-    public static String imslpTransModelSer = "./imslp_indep_transitions.ser";
+    public static String imslpTransModelSer = "/Users/tberg/Dropbox/demos/klavier/data/imslp_indep_transitions.ser";
 
     @Option(gloss = "")
     public static int updateActivationsIters = 800;
@@ -134,24 +136,23 @@ public class Main implements Runnable {
 	@Option(gloss = "")
 	public static double nmfMinEps = 1e-10;
 	@Option(gloss = "")
-	public static int nmfNumIters = 200;
-//	public static int nmfNumIters = 800;
-//	public static int nmfNumIters = 400;
+	public static int nmfNumIters = 800;
 	@Option(gloss = "")
-	public static boolean useGpu = false;
-//	public static boolean useGpu = true;
-	@Option(gloss = "")
-	public static int nmfGpuId = 0;
+	public static boolean useGpu = true;
+//	@Option(gloss = "")
+//	public static int nmfGpuId = 0;
 	@Option(gloss = "")
 	public static int numThreads = 8;
 
 	public static enum NMFType {KL, L2, Beta, LogNormal};
 
 	public void run() {
-		if (useGpu) CublasUtil.startup(nmfGpuId);
+		if (useGpu) JOCLBlasUtil.startup();
 		
 		EvalSuffStats totalEvalOnsets = new EvalSuffStats(0, 0, 0);
 		EvalSuffStats totalEvalFrames = new EvalSuffStats(0, 0, 0);
+		
+		(new File(outputDir)).mkdirs();
 		
 		if (train) {
 			List<Datum> inputData = new ArrayList<Datum>();
@@ -288,7 +289,7 @@ public class Main implements Runnable {
 			System.out.println("Total eval frames: "+totalEvalFrames);
 		}
 			
-		if (useGpu) CublasUtil.shutdown();
+		if (useGpu) JOCLBlasUtil.shutdown();
 	}
 	
     private static byte[] toByteArray(InputStream inputStream) throws IOException {

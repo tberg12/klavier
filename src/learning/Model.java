@@ -8,7 +8,7 @@ import java.util.List;
 
 import eval.PitchEventUtil;
 import eval.PitchEventUtil.NoteState;
-import nmf.NMFUtil;
+import nmf.NMFUtilOpenCL;
 import tberg.murphy.arrays.a;
 import tberg.murphy.threading.BetterThreader;
 import tberg.murphy.tuple.Pair;
@@ -133,10 +133,10 @@ public class Model {
 //			double endStepSize = 2e1;
 			
 			if (Main.activationsPriorWeight == 0.0) {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfBetaGPU(atoms, false, totalActivation, true, totalSpect, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtil.nmfBeta(atoms, false, totalActivation, true, totalSpect, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfBetaGPU(atoms, false, totalActivation, true, totalSpect, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtilOpenCL.nmfBeta(atoms, false, totalActivation, true, totalSpect, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
 				return separateMatrices(atomsAndActivations.getSecond(), appendNumRows);
 			} else {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfBetaL2PriorExpGradGPU(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) Main.activationsPriorWeight, true, totalSpect, (float) Main.updateActivationsStepSize, (float) Main.updateActivationsStepSize, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtil.nmfBetaL2PriorExpGrad(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) Main.activationsPriorWeight, true, totalSpect, (float) Main.updateActivationsStepSize, (float) Main.updateActivationsStepSize, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfBetaL2PriorExpGradGPU(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) Main.activationsPriorWeight, true, totalSpect, (float) Main.updateActivationsStepSize, (float) Main.updateActivationsStepSize, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtilOpenCL.nmfBetaL2PriorExpGrad(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) Main.activationsPriorWeight, true, totalSpect, (float) Main.updateActivationsStepSize, (float) Main.updateActivationsStepSize, Main.updateActivationsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
 				return separateMatrices(atomsAndActivations.getSecond(), appendNumRows);
 			}
 		} else {
@@ -146,10 +146,10 @@ public class Model {
 			double endStepSize = 1e-1;
 			
 			if (activationPriorWeight == 0.0) {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfKLGPU(atoms, false, totalActivation, true, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtil.nmfKL(atoms, false, totalActivation, true, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfKLGPU(atoms, false, totalActivation, true, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtilOpenCL.nmfKL(atoms, false, totalActivation, true, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
 				return separateMatrices(atomsAndActivations.getSecond(), appendNumRows);
 			} else {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfKLL2PriorExpGradGPU(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) activationPriorWeight, true, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtil.nmfKLL2PriorExpGrad(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) activationPriorWeight, true, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfKLL2PriorExpGradGPU(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) activationPriorWeight, true, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtilOpenCL.nmfKLL2PriorExpGrad(atoms, atoms, 0.0f, false, totalPreActivation, totalActivation, (float) activationPriorWeight, true, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
 				return separateMatrices(atomsAndActivations.getSecond(), appendNumRows);
 			}
 		}
@@ -174,10 +174,10 @@ public class Model {
 //			double endStepSize = 5e-1;
 			
 			if (Main.atomsPriorWeight == 0.0) {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfBetaGPU(atoms, true, totalActivation, false, totalSpect, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtil.nmfBeta(atoms, true, totalActivation, false, totalSpect, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfBetaGPU(atoms, true, totalActivation, false, totalSpect, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtilOpenCL.nmfBeta(atoms, true, totalActivation, false, totalSpect, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
 				atoms = atomsAndActivations.getFirst();
 			} else {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfBetaL2PriorExpGradGPU(atomsPrior, atoms, (float) Main.atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) Main.updateAtomsStepSize, (float) Main.updateAtomsStepSize, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtil.nmfBetaL2PriorExpGrad(atomsPrior, atoms, (float) Main.atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) Main.updateAtomsStepSize, (float) Main.updateAtomsStepSize, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfBetaL2PriorExpGradGPU(atomsPrior, atoms, (float) Main.atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) Main.updateAtomsStepSize, (float) Main.updateAtomsStepSize, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta) : NMFUtilOpenCL.nmfBetaL2PriorExpGrad(atomsPrior, atoms, (float) Main.atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) Main.updateAtomsStepSize, (float) Main.updateAtomsStepSize, Main.updateAtomsIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps, (float) Main.nmfBeta));
 				atoms = atomsAndActivations.getFirst();
 			}
 		} else {
@@ -187,10 +187,10 @@ public class Model {
 			double endStepSize = 1e-3;
 			
 			if (atomsPriorWeight == 0.0) {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfKLGPU(atoms, true, totalActivation, false, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtil.nmfKL(atoms, true, totalActivation, false, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfKLGPU(atoms, true, totalActivation, false, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtilOpenCL.nmfKL(atoms, true, totalActivation, false, totalSpect, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
 				atoms = atomsAndActivations.getFirst();
 			} else {
-				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtil.nmfKLL2PriorExpGradGPU(atomsPrior, atoms, (float) atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtil.nmfKLL2PriorExpGrad(atomsPrior, atoms, (float) atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
+				Pair<float[][],float[][]> atomsAndActivations = (Main.useGpu ? NMFUtilOpenCL.nmfKLL2PriorExpGradGPU(atomsPrior, atoms, (float) atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps) : NMFUtilOpenCL.nmfKLL2PriorExpGrad(atomsPrior, atoms, (float) atomsPriorWeight, true, totalActivation, totalActivation, 0.0f, false, totalSpect, (float) startStepSize, (float) endStepSize, nmfIters, (float) Main.nmfSilenceEps, (float) Main.nmfMinEps));
 				atoms = atomsAndActivations.getFirst();
 			}
 		}
