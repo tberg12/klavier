@@ -142,14 +142,12 @@ public class Main implements Runnable {
 	@Option(gloss = "")
 	public static boolean useGpu = true;
 	@Option(gloss = "")
-	public static int nmfGpuId = 2;
-	@Option(gloss = "")
 	public static int numThreads = 8;
 
 	public static enum NMFType {KL, L2, Beta, LogNormal};
 
 	public void run() {
-		if (useGpu) JOCLBlasUtil.startup(nmfGpuId);
+		if (useGpu) JOCLBlasUtil.startup();
 		
 		EvalSuffStats totalEvalOnsets = new EvalSuffStats(0, 0, 0);
 		EvalSuffStats totalEvalFrames = new EvalSuffStats(0, 0, 0);
