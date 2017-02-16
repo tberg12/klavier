@@ -37,6 +37,8 @@ public class Main implements Runnable {
 	public static boolean buildInitializer = false;
 	@Option(gloss = "")
 	public static boolean writeInitializer = false;
+	@Option(gloss = "")
+	public static boolean writeTrainedSpect = false;
 	
     @Option(gloss = "")
     public static int filterNoteMinIndex = 0;
@@ -55,7 +57,7 @@ public class Main implements Runnable {
 	@Option(gloss = "")
 	public static float datasetPrefixLengthSec = 30;
 	@Option(gloss = "")
-	public static String outputDir = "/Users/tberg/Desktop/piano_test/";
+	public static String outputDir = "./";
 	@Option(gloss = "")
 	public static String initSpectEnvSer = "/Users/tberg/Dropbox/demos/klavier/piano_demo/initSpectEnvFull.ser";
 	@Option(gloss = "")
@@ -65,14 +67,14 @@ public class Main implements Runnable {
 //	public static String spectEnvSer = "./piano_demo/learnedSpecEnvFullDemo1.ser";
 //	public static String spectEnvSer = "./piano_demo/learnedSpecEnvMiddleCPiano12.ser";
 //	public static String spectEnvSer = "./piano_demo/learnedSpecEnvFullMaps.ser";
-//	public static String spectEnvSer = "/Users/tberg/Dropbox/demos/klavier/piano_demo/learnedSpecEnvGould2Itunes.ser";
-	public static String spectEnvSer = "/Users/tberg/Desktop/piano_test/learnedSpecEnvGould2Itunes.ser";
+	public static String spectEnvSer = "/Users/tberg/Dropbox/demos/klavier/piano_demo/learnedSpecEnvGould2Itunes.ser";
+//	public static String spectEnvSer = "/Users/tberg/Desktop/piano_test/learnedSpecEnvGould2Itunes.ser";
     @Option(gloss = "")
     public static String imslpTransModelSer = "/Users/tberg/Dropbox/demos/klavier/data/imslp_indep_transitions.ser";
 
     @Option(gloss = "")
-    public static int updateActivationsIters = 800;
-//    public static int updateActivationsIters = 400;
+//    public static int updateActivationsIters = 800;
+    public static int updateActivationsIters = 400;
     @Option(gloss = "")
     public static double updateActivationsStepSize = 5e-1;
 //    public static double updateActivationsStepSize = 1e0;
@@ -139,15 +141,15 @@ public class Main implements Runnable {
 	public static int nmfNumIters = 800;
 	@Option(gloss = "")
 	public static boolean useGpu = true;
-//	@Option(gloss = "")
-//	public static int nmfGpuId = 0;
+	@Option(gloss = "")
+	public static int nmfGpuId = 2;
 	@Option(gloss = "")
 	public static int numThreads = 8;
 
 	public static enum NMFType {KL, L2, Beta, LogNormal};
 
 	public void run() {
-		if (useGpu) JOCLBlasUtil.startup();
+		if (useGpu) JOCLBlasUtil.startup(nmfGpuId);
 		
 		EvalSuffStats totalEvalOnsets = new EvalSuffStats(0, 0, 0);
 		EvalSuffStats totalEvalFrames = new EvalSuffStats(0, 0, 0);
@@ -221,7 +223,7 @@ public class Main implements Runnable {
 				}
 			}
 			
-			DatasetIO.writeSpectralAtomsAndEnvelopes(model.getSpectralAtomsAndEnvelopes(), spectEnvSer);
+			if (writeTrainedSpect) DatasetIO.writeSpectralAtomsAndEnvelopes(model.getSpectralAtomsAndEnvelopes(), spectEnvSer);
 		} else {
 			List<Datum> inputData = new ArrayList<Datum>();
 			if (inputType == InputType.LIVE) {
